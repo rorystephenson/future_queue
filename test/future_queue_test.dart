@@ -4,7 +4,7 @@ import 'package:future_queue/future_queue.dart';
 import 'package:test/test.dart';
 
 void main() {
-  List<int> returnedValues;
+  late List<int> returnedValues;
 
   setUp(() {
     returnedValues = [];
@@ -12,11 +12,11 @@ void main() {
 
   void _expectAppend(
     FutureQueue futureQueue, {
-    int delay,
-    String throwA,
-    int value,
-    int timeLimit,
-    int completeTo,
+    int? delay,
+    String? throwA,
+    int? value,
+    int? timeLimit,
+    int? completeTo,
     dynamic throws,
   }) {
     expect(
@@ -25,7 +25,7 @@ void main() {
               () => throwA != null
                   ? throw throwA
                   : Future<int>.delayed(
-                      Duration(milliseconds: delay), () => value),
+                      Duration(milliseconds: delay!), () => value!),
               timeLimit:
                   timeLimit == null ? null : Duration(milliseconds: timeLimit))
           .then((value) {
