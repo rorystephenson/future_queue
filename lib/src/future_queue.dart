@@ -17,17 +17,20 @@ class FutureQueue<T> {
 
   Future<T?> get future => _future;
 
-  Future<T?> append(FutureOr<T> Function() future, {Duration? timeLimit}) {
-    return _future = _future.catchError((_) {}).then((_) {
+  /// Adds the given [future] to queue. Note that the [previous] value will be
+  /// null if the last operation caused an exception.
+  Future<T?> append(FutureOr<T> Function(T? previous) future,
+      {Duration? timeLimit}) {
+    return _future = _future.catchError((_) {}).then((previous) {
       if (timeLimit != null || _timeLimit != null) {
-        return _withTimeout(future, timeLimit ?? _timeLimit!);
+        return _withTimeout(future(previous), timeLimit ?? _timeLimit!);
       }
-      return future();
+      return future(previous);
     });
   }
 
-  Future<T> _withTimeout(FutureOr<T> Function() future, Duration timeLimit) {
-    return Future.value(future()).timeout(timeLimit);
+  Future<T> _withTimeout(FutureOr<T> future, Duration timeLimit) {
+    return Future.value(future).timeout(timeLimit);
   }
 
   /// Waits for queued events to finish.
