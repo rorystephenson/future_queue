@@ -13,7 +13,7 @@ void main() {
 
   tearDown(() {
     // Overwrite after test to prevent test errors.
-    futureQueue = FutureQueue(seed: null);
+    futureQueue = FutureQueue(seed: Future.value(null));
   });
 
   void _expectAppend({
@@ -43,29 +43,29 @@ void main() {
   }
 
   test('waits for the previous future executing the next one', () async {
-    futureQueue = FutureQueue(seed: null);
+    futureQueue = FutureQueue(seed: Future.value(null));
 
     _expectAppend(previous: null, delay: 300, value: 1, completeTo: 1);
     _expectAppend(previous: 1, delay: 200, value: 2, completeTo: 2);
     _expectAppend(previous: 2, delay: 100, value: 3, completeTo: 3);
 
-    await futureQueue.close();
+    await futureQueue.wait();
     expect(returnedValues, [1, 2, 3]);
   });
 
   test('only returns errors to the responsible call to append', () async {
-    futureQueue = FutureQueue<int?>(seed: null);
+    futureQueue = FutureQueue<int?>(seed: Future.value(null));
 
     _expectAppend(previous: null, throwA: 'boom', value: 1, throws: 'boom');
     _expectAppend(previous: null, delay: 200, value: 2, completeTo: 2);
 
-    await futureQueue.close();
+    await futureQueue.wait();
     expect(returnedValues, [2]);
   });
 
   test('times out due to global timeout', () async {
     futureQueue = FutureQueue<int?>(
-      seed: null,
+      seed: Future.value(null),
       timeLimit: Duration(milliseconds: 250),
     );
 
@@ -74,12 +74,12 @@ void main() {
         previous: 1, delay: 500, value: 2, throws: isA<TimeoutException>());
     _expectAppend(previous: null, delay: 100, value: 3, completeTo: 3);
 
-    await futureQueue.close();
+    await futureQueue.wait();
     expect(returnedValues, [1, 3]);
   });
 
   test('times out due to append timeout', () async {
-    futureQueue = FutureQueue<int?>(seed: null);
+    futureQueue = FutureQueue<int?>(seed: Future.value(null));
     _expectAppend(previous: null, delay: 200, value: 1, completeTo: 1);
     _expectAppend(
       previous: 1,
@@ -90,13 +90,13 @@ void main() {
     );
     _expectAppend(previous: null, delay: 100, value: 3, completeTo: 3);
 
-    await futureQueue.close();
+    await futureQueue.wait();
     expect(returnedValues, [1, 3]);
   });
 
   test('append timeout overrides global timeout', () async {
     futureQueue = FutureQueue<int?>(
-      seed: null,
+      seed: Future.value(null),
       timeLimit: Duration(milliseconds: 250),
     );
 
@@ -117,7 +117,14 @@ void main() {
     );
     _expectAppend(previous: null, delay: 200, value: 4, completeTo: 4);
 
-    await futureQueue.close();
+    await futureQueue.wait();
     expect(returnedValues, [1, 2, 4]);
+  });
+
+  test('wait() does not rethrow an error that occurred', () async {
+    futureQueue = FutureQueue<int?>(seed: Future.value(null));
+    _expectAppend(previous: null, throwA: 'boom', throws: 'boom');
+    _expectAppend(previous: null, throwA: 'boom2', throws: 'boom2');
+    await futureQueue.wait();
   });
 }
