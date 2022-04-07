@@ -7,7 +7,7 @@ Dart package which provides sequential future execution with return values.
 Here is a code example which demonstrates how futures are queued:
 
 ```dart
-final futureQueue = FutureQueue<int>();
+final futureQueue = FutureQueue<int>(seed: 0);
 
 final result1 = futureQueue.append(
   () => Future.delayed(Duration(seconds: 5), () => 1),
@@ -25,6 +25,15 @@ Will print:
 ```
 1
 2
+```
+
+
+### Allowing null
+
+Simply set the type of the `FutureQueue` to a nullable value:
+
+```dart
+final futureQueue = FutureQueue<int?>(seed: null);
 ```
 
 Even though the first future takes 4 seconds longer than the second future.

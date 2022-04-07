@@ -1,3 +1,7 @@
+## [1.0.0+1] - 07/04/22
+
+* Update README
+
 ## [1.0.0] - 07/04/22
 
 * BREAKING: FutureQueue now allows non-null returning futures. This means that
